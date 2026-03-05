@@ -6,7 +6,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import {getLearnedMeaning, saveLearned} from "@/lib/learnedDict";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const cache: Record<string, string> = {};
+
 
 async function getMeaning(word: string): Promise<string | null> {
     // 1순위: 한국어 사전
@@ -53,11 +53,13 @@ async function tokenizeWithAI(text: string): Promise<string[]> {
 문장: "${text}"`
             }]
         });
-        const raw = (message.content[0] as { text: string }).text.trim();
+        const raw = (message.content[0] as { text: string }).text
+            .trim()
+            .replace(/```json|```/g, '')
+            .trim();
         const parsed = JSON.parse(raw);
         return Array.isArray(parsed) ? parsed : text.split('');
     } catch {
-        // 실패하면 한 글자씩 폴백
         return text.split('');
     }
 }
